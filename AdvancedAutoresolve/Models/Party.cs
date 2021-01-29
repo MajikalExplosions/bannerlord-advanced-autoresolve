@@ -32,9 +32,13 @@ namespace AdvancedAutoResolve.Models
         internal bool HasCavalry => Troops.Any(t => TroopTypeExtensions.IsCavalryTroopType((int)t.TroopType));
         internal bool HasHorseArchers => Troops.Any(t => TroopTypeExtensions.IsHorseArcherTroopType((int)t.TroopType));
 
+        internal PartyBase Base;
+
 
         internal Party(PartyBase party, bool isSiegeDefender = false)
         {
+            Base = party;
+
             TerrainType = Campaign.Current.MapSceneWrapper.GetTerrainTypeAtPosition(party.MapEvent.Position);
             IsSiegeDefender = isSiegeDefender;
             
@@ -45,10 +49,18 @@ namespace AdvancedAutoResolve.Models
                 PartyLeader = new PartyLeader(
                     party.LeaderHero.GetSkillValue(DefaultSkills.Leadership),
                     party.LeaderHero.GetSkillValue(DefaultSkills.Tactics),
-                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.TacticalSuperiority),
-                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.HammerAndAnvil),
-                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.Phalanx),
-                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.AmbushSpecialist));
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.TightFormations),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.LooseFormations),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.AsymmetricalWarfare),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.ProperEngagement),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.LawKeeper),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.Coaching),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.EliteReserves),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.Encirclement),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.Counteroffensive),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.Besieged),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Scouting.Vanguard),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Scouting.Rearguard));
             }
 
             Troops = new List<Troop>();

@@ -24,6 +24,10 @@ namespace AdvancedAutoResolve.Simulation.Models
 
         internal bool IsPlayerInvolved { get; private set; }
 
+        internal TerrainType Terrain { get; private set; }
+
+        internal MapEvent Battle;
+
         internal SimulationModel(MapEvent mapEvent, PartyBase attackerParty, PartyBase defenderParty)
         {
             BattleId = mapEvent.Id;
@@ -33,6 +37,9 @@ namespace AdvancedAutoResolve.Simulation.Models
 
             Parties = new ReadOnlyCollection<Party>(new List<Party> { new Party(defenderParty, isSiegeBattle), new Party(attackerParty) }); // do not change the order of the list
             IsPlayerInvolved = Hero.MainHero.Id == attackerParty.LeaderHero?.Id || Hero.MainHero.Id == defenderParty.LeaderHero?.Id;
+
+            Terrain = (attackerParty.IsMobile && defenderParty.IsMobile) ? Parties[1].TerrainType : TerrainType.Water;
+            Battle = mapEvent;
         }
 
         internal int SimulateHit(MBGUID strikerTroopId, MBGUID strikedTroopId, float strikerAdvantage)
@@ -45,12 +52,13 @@ namespace AdvancedAutoResolve.Simulation.Models
             var attackerPower = attacker.GetPower();
             var attackerTacticModifiers = attacker.GetModifiersFromTactics();
             var attackerSiegeModifiers = attacker.GetSiegeDefenderModifiers();
-            var attackerExtraPowerFromLeaderPerks = attacker.GetExtraAttackingPowerFromLeaderPerks(defender);
+            var attackerExtraPowerFromLeaderPerks = attacker.GetAttackingModifierFromLeaderPerks(defender, Terrain, Parties[1].Troops.Contains(attacker), Battle, Parties[0].Base);
             var attackerLeaderAttackModifier = attacker.GetAttackModifierFromLeader();
 
             var defenderPower = defender.GetPower();
             var defenderTacticModifiers = defender.GetModifiersFromTactics();
             var defenderSiegeModifiers = defender.GetSiegeDefenderModifiers();
+            var defenderExtraPowerFromLeaderPerks = defender.GetDefendingModifierFromLeaderPerks(attacker, Terrain, Parties[1].Troops.Contains(defender), Battle);
             var defenderLeaderDefenseModifier = defender.GetDefenseModifierFromLeader();
 
             bool makesSenseToAttackThisUnit = attacker.DoesItMakeSenseToAttackThisUnit(defender);
@@ -67,6 +75,7 @@ namespace AdvancedAutoResolve.Simulation.Models
             var finalDefenderPower = defenderPower 
                 * defenderTacticModifiers.DefenseBonus 
                 * defenderSiegeModifiers.DefenseBonus 
+                * defenderExtraPowerFromLeaderPerks 
                 * defenderLeaderDefenseModifier;
 
             var damage = (int)(50f * (finalAttackerPower / finalDefenderPower) * strikerAdvantage * troopNumbersAdvantage);

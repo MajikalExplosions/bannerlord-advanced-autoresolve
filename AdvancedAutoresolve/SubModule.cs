@@ -26,7 +26,7 @@ namespace AdvancedAutoResolve
         {
             if (Config.ConfigLoaded)
             {
-                MessageHelper.DisplayText("Loaded AdvancedAutoresolve", DisplayTextStyle.Success);
+                MessageHelper.DisplayText("Loaded Advanced Autoresolve", DisplayTextStyle.Success);
             }
             else
             {

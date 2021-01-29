@@ -21,6 +21,30 @@ namespace AdvancedAutoResolve.Models
         internal Party PartyModel { get; }
         internal TroopType TroopType { get; }
 
+        public bool IsInfantry
+        {
+            get
+            {
+                return TroopType == TroopType.ShockInfantry || TroopType == TroopType.ShockInfantry || TroopType == TroopType.ShockInfantry;
+            }
+        }
+
+        public bool IsRanged
+        {
+            get
+            {
+                return TroopType == TroopType.Ranged || TroopType == TroopType.HorseArcher;
+            }
+        }
+
+        public bool IsMounted
+        {
+            get
+            {
+                return TroopType == TroopType.LightCavalry || TroopType == TroopType.HeavyCavalry || TroopType == TroopType.HorseArcher;
+            }
+        }
+
         /// <summary>
         /// Subtracts <paramref name="damage"/> amount from <see cref="Troop.Health"/>
         /// </summary>
@@ -112,41 +136,92 @@ namespace AdvancedAutoResolve.Models
             return PartyModel.IsSiegeDefender ? Config.CurrentConfig.SiegeDefendersModifiers : Modifiers.GetDefaultModifiers();
         }
 
-        internal float GetExtraAttackingPowerFromLeaderPerks(Troop defender)
+        internal float GetAttackingModifierFromLeaderPerks(Troop defender, TerrainType terrain, bool isInitiator, MapEvent battle, PartyBase defendingParty)
         {
+            if (!PartyModel.HasLeader) return 1f;
+
             float modifier = 1f;
-            if (PartyModel.HasLeader)
+
+            if (PartyModel.PartyLeader.HasTightFormationsPerk && IsInfantry && defender.IsMounted)
             {
-                if (PartyModel.PartyLeader.HasTacticalSuperiorityPerk)
-                {
-                    modifier += 0.05f;
-                }
-                if (PartyModel.PartyLeader.HasHammerAndAnvilPerk)
-                {
-                    //TODO Can HA use this perk as well??
-                    if (TroopType == TroopType.LightCavalry && defender.TroopType == TroopType.Ranged)
-                    {
-                        modifier += 0.5f;
-                    }
-                }
-                if (PartyModel.PartyLeader.HasPhalanxPerk)
-                {
-                    if (TroopType == TroopType.HeavyInfantry && defender.TroopType == TroopType.LightCavalry || defender.TroopType == TroopType.HorseArcher)
-                    {
-                        modifier += 0.5f;
-                    }
-                }
-                if (PartyModel.PartyLeader.HasAmbushSpecialistPerk && PartyModel.TerrainType == TerrainType.Forest)
-                {
-                    if (TroopType == TroopType.Ranged)
-                    {
-                        modifier += 0.6f;
-                    }
-                }
+                modifier += 0.1f;
+            }
+
+            if (PartyModel.PartyLeader.HasAsymmetricalWarfarePerk && (terrain == TerrainType.Snow || terrain == TerrainType.Forest))
+            {
+                modifier += 0.1f;
+            }
+
+            if (PartyModel.PartyLeader.HasProperEngagementPerk && (terrain == TerrainType.Plain || terrain == TerrainType.Steppe || terrain == TerrainType.Desert))
+            {
+                modifier += 0.05f;
+            }
+
+            if (PartyModel.PartyLeader.HasLawKeeperPerk && defendingParty.IsMobile && defendingParty.MobileParty.IsBandit)
+            {
+                modifier += 0.1f;
+            }
+
+            if (PartyModel.PartyLeader.HasCoachingPerk)
+            {
+                modifier += 0.03f;
+            }
+
+            if (PartyModel.PartyLeader.HasEncirclementPerk && PartyModel.Troops.Count > defender.PartyModel.Troops.Count)
+            {
+                modifier += 0.05f;
+            }
+
+            if (PartyModel.PartyLeader.HasCounteroffensivePerk && PartyModel.Troops.Count < defender.PartyModel.Troops.Count)
+            {
+                modifier += 0.1f;
+            }
+
+            if (PartyModel.PartyLeader.HasBeseigedPerk && ! isInitiator && battle.IsSiegeAssault)
+            {
+                modifier += 0.1f;
+            }
+
+            if (PartyModel.PartyLeader.HasVanguardPerk && isInitiator)
+            {
+                modifier += 0.05f;
+            }
+
+            //TODO Check if sallying out makes a party the initiator, or if the one being sallied out against is the initiator
+            if (PartyModel.PartyLeader.HasVanguardPerk && isInitiator && battle.IsSallyOut)
+            {
+                modifier += 0.1f;
+            }
+
+            if (PartyModel.PartyLeader.HasRearguardPerk && ! isInitiator && battle.IsSiegeOutside)
+            {
+                modifier += 0.1f;
             }
 
             return modifier;
         }
+
+
+        internal float GetDefendingModifierFromLeaderPerks(Troop attacker, TerrainType terrain, bool isInitiator, MapEvent battle)
+        {
+            if (!PartyModel.HasLeader) return 1f;
+
+            float modifier = 1f;
+
+            if (PartyModel.PartyLeader.HasLooseFormationsPerk && IsInfantry && attacker.IsRanged)
+            {
+                modifier += 0.1f;
+            }
+
+            if (PartyModel.PartyLeader.HasEliteReservesPerk && CharacterObject.Tier >= 3)
+            {
+                modifier += 0.2f;
+            }
+
+            return modifier;
+        }
+
+
 
         public override string ToString()
         {
