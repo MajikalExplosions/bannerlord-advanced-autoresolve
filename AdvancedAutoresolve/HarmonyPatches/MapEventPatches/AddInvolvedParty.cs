@@ -5,6 +5,7 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using TaleWorlds.CampaignSystem;
@@ -12,12 +13,17 @@ using TaleWorlds.Core;
 
 namespace AdvancedAutoResolve.HarmonyPatches.MapEventPatches
 {
-    [HarmonyPatch(typeof(MapEvent), nameof(MapEvent.AddInvolvedParty))]
+    [HarmonyPatch]
     internal static class AddInvolvedParty
     {
-        internal static void Postfix(ref MapEvent __instance, PartyBase involvedParty, BattleSideEnum side, bool notFromInit = true)
+
+        internal static MethodBase TargetMethod()
         {
-            if(SimulationsPool.TryGetSimulationModel(__instance.Id, out var simulationModel) && notFromInit)
+            return AccessTools.Method(typeof(MapEvent), "AddInvolvedPartyInternal");
+        }
+        internal static void Postfix(ref MapEvent __instance, PartyBase involvedParty, BattleSideEnum side)
+        {
+            if(SimulationsPool.TryGetSimulationModel(__instance.Id, out var simulationModel))
             {
                 simulationModel.AddTroopsFromInvolvedParty(involvedParty, side);
 
