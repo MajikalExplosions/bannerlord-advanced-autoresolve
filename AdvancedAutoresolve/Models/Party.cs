@@ -55,10 +55,12 @@ namespace AdvancedAutoResolve.Models
                     party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.ProperEngagement),
                     party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.LawKeeper),
                     party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.Coaching),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.OnTheMarch),
                     party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.EliteReserves),
                     party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.Encirclement),
-                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.Counteroffensive),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.PreBattleManeuvers),
                     party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.Besieged),
+                    party.LeaderHero.GetPerkValue(DefaultPerks.Tactics.Counteroffensive),
                     party.LeaderHero.GetPerkValue(DefaultPerks.Scouting.Vanguard),
                     party.LeaderHero.GetPerkValue(DefaultPerks.Scouting.Rearguard));
             }

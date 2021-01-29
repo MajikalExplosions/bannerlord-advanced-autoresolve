@@ -51,13 +51,13 @@ namespace AdvancedAutoResolve.Simulation.Models
 
             var attackerPower = attacker.GetPower();
             var attackerTacticModifiers = attacker.GetModifiersFromTactics();
-            var attackerSiegeModifiers = attacker.GetAttackingSiegeModifier();
+            var attackerSiegeModifiers = attacker.GetAttackingSiegeModifier(defender);
             var attackerExtraPowerFromLeaderPerks = attacker.GetAttackingModifierFromLeaderPerks(defender, Terrain, Parties[1].Troops.Contains(attacker), Battle, Parties[0].Base);
             var attackerLeaderAttackModifier = attacker.GetAttackModifierFromLeader();
 
             var defenderPower = defender.GetPower();
             var defenderTacticModifiers = defender.GetModifiersFromTactics();
-            var defenderSiegeModifiers = defender.GetDefendingSiegeModifier();
+            var defenderSiegeModifiers = defender.GetDefendingSiegeModifier(attacker);
             var defenderExtraPowerFromLeaderPerks = defender.GetDefendingModifierFromLeaderPerks(attacker, Terrain, Parties[1].Troops.Contains(defender), Battle);
             var defenderLeaderDefenseModifier = defender.GetDefenseModifierFromLeader();
 

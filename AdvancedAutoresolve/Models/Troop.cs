@@ -25,7 +25,7 @@ namespace AdvancedAutoResolve.Models
         {
             get
             {
-                return TroopType == TroopType.ShockInfantry || TroopType == TroopType.ShockInfantry || TroopType == TroopType.SkirmishInfantry;
+                return TroopType == TroopType.ShockInfantry || TroopType == TroopType.HeavyInfantry || TroopType == TroopType.SkirmishInfantry;
             }
         }
 
