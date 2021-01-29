@@ -51,13 +51,13 @@ namespace AdvancedAutoResolve.Simulation.Models
 
             var attackerPower = attacker.GetPower();
             var attackerTacticModifiers = attacker.GetModifiersFromTactics();
-            var attackerSiegeModifiers = attacker.GetSiegeDefenderModifiers();
+            var attackerSiegeModifiers = attacker.GetAttackingSiegeModifier();
             var attackerExtraPowerFromLeaderPerks = attacker.GetAttackingModifierFromLeaderPerks(defender, Terrain, Parties[1].Troops.Contains(attacker), Battle, Parties[0].Base);
             var attackerLeaderAttackModifier = attacker.GetAttackModifierFromLeader();
 
             var defenderPower = defender.GetPower();
             var defenderTacticModifiers = defender.GetModifiersFromTactics();
-            var defenderSiegeModifiers = defender.GetSiegeDefenderModifiers();
+            var defenderSiegeModifiers = defender.GetDefendingSiegeModifier();
             var defenderExtraPowerFromLeaderPerks = defender.GetDefendingModifierFromLeaderPerks(attacker, Terrain, Parties[1].Troops.Contains(defender), Battle);
             var defenderLeaderDefenseModifier = defender.GetDefenseModifierFromLeader();
 
@@ -67,14 +67,14 @@ namespace AdvancedAutoResolve.Simulation.Models
 
             var finalAttackerPower = attackerPower 
                 * attackerTacticModifiers.AttackBonus 
-                * attackerSiegeModifiers.AttackBonus 
+                * attackerSiegeModifiers 
                 * attackerExtraPowerFromLeaderPerks 
                 * attackerLeaderAttackModifier 
                 * makesSenseToAttackUnitModifier;
 
             var finalDefenderPower = defenderPower 
                 * defenderTacticModifiers.DefenseBonus 
-                * defenderSiegeModifiers.DefenseBonus 
+                * defenderSiegeModifiers 
                 * defenderExtraPowerFromLeaderPerks 
                 * defenderLeaderDefenseModifier;
 

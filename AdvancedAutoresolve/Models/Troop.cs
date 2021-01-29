@@ -25,7 +25,7 @@ namespace AdvancedAutoResolve.Models
         {
             get
             {
-                return TroopType == TroopType.ShockInfantry || TroopType == TroopType.ShockInfantry || TroopType == TroopType.ShockInfantry;
+                return TroopType == TroopType.ShockInfantry || TroopType == TroopType.ShockInfantry || TroopType == TroopType.SkirmishInfantry;
             }
         }
 
@@ -33,7 +33,7 @@ namespace AdvancedAutoResolve.Models
         {
             get
             {
-                return TroopType == TroopType.Ranged || TroopType == TroopType.HorseArcher;
+                return TroopType == TroopType.Ranged || TroopType == TroopType.HorseArcher || TroopType == TroopType.SkirmishInfantry;
             }
         }
 
@@ -131,14 +131,38 @@ namespace AdvancedAutoResolve.Models
             return modifier;
         }
 
-        internal Modifiers GetSiegeDefenderModifiers()
+        internal float GetAttackingSiegeModifier(Troop defender)
+        {
+            float modifier = 0f;
+
+            if (PartyModel.IsSiegeDefender) modifier = Config.CurrentConfig.SiegeDefendersModifiers.AttackBonus;
+
+            if (PartyModel.HasLeader && PartyModel.PartyLeader.HasOnTheMarchPerk) modifier *= 1.2f;
+            if (defender.PartyModel.HasLeader && defender.PartyModel.PartyLeader.HasOnTheMarchPerk) modifier *= 0.8f;
+
+            return 1f + modifier;
+        }
+
+        internal float GetDefendingSiegeModifier(Troop attacker)
+        {
+            float modifier = 0f;
+
+            if (PartyModel.IsSiegeDefender) modifier = Config.CurrentConfig.SiegeDefendersModifiers.DefenseBonus;
+
+            if (PartyModel.HasLeader && PartyModel.PartyLeader.HasOnTheMarchPerk) modifier *= 1.2f;
+            if (attacker.PartyModel.HasLeader && attacker.PartyModel.PartyLeader.HasOnTheMarchPerk) modifier *= 0.8f;
+
+            return 1f + modifier;
+        }
+
+        internal Modifiers GetSiegeDefenderModifiersDeprecated()
         {
             return PartyModel.IsSiegeDefender ? Config.CurrentConfig.SiegeDefendersModifiers : Modifiers.GetDefaultModifiers();
         }
 
         internal float GetAttackingModifierFromLeaderPerks(Troop defender, TerrainType terrain, bool isInitiator, MapEvent battle, PartyBase defendingParty)
         {
-            if (!PartyModel.HasLeader) return 1f;
+            if (! PartyModel.HasLeader) return 1f;
 
             float modifier = 1f;
 
@@ -172,12 +196,18 @@ namespace AdvancedAutoResolve.Models
                 modifier += 0.05f;
             }
 
-            if (PartyModel.PartyLeader.HasCounteroffensivePerk && PartyModel.Troops.Count < defender.PartyModel.Troops.Count)
+            if (PartyModel.PartyLeader.HasPreBattleManeuversPerk)
+            {
+                if (! defender.PartyModel.HasLeader) modifier += PartyModel.PartyLeader.TacticsLevel * 0.01f;
+                else modifier += Math.Max(0, (PartyModel.PartyLeader.TacticsLevel - defender.PartyModel.PartyLeader.TacticsLevel) * 0.01f);
+            }
+
+            if (PartyModel.PartyLeader.HasBeseigedPerk && !isInitiator && battle.IsSiegeAssault)
             {
                 modifier += 0.1f;
             }
 
-            if (PartyModel.PartyLeader.HasBeseigedPerk && ! isInitiator && battle.IsSiegeAssault)
+            if (PartyModel.PartyLeader.HasCounteroffensivePerk && PartyModel.Troops.Count < defender.PartyModel.Troops.Count)
             {
                 modifier += 0.1f;
             }
@@ -204,7 +234,7 @@ namespace AdvancedAutoResolve.Models
 
         internal float GetDefendingModifierFromLeaderPerks(Troop attacker, TerrainType terrain, bool isInitiator, MapEvent battle)
         {
-            if (!PartyModel.HasLeader) return 1f;
+            if (! PartyModel.HasLeader) return 1f;
 
             float modifier = 1f;
 
